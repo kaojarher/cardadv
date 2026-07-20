@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>奇幻不朽 - 60席精煉圖鑑系統</title>
+    <title>奇幻冒險 - 60席核心局部切圖系統</title>
     <style>
         :root {
             --upr-color: linear-gradient(135deg, #ff007f, #7928ca, #00dfd8);
@@ -14,8 +14,9 @@
             --grass-color: #10b981;
             --bg-dark: #09090b;
             
+            /* 調整格子的實體寬高，確保符合 3x4 黃金比例 */
             --card-width: 135px;
-            --card-height: 180px; /* 3x4 黃金比例 */
+            --card-height: 180px; 
         }
 
         body {
@@ -71,7 +72,7 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* [分頁一：開卡主頁] */
+        /* 開卡主頁 */
         .pack-dispenser-box {
             margin: 20px auto;
             width: 100%;
@@ -91,25 +92,14 @@
             margin: 0 auto 20px; border-radius: 12px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             font-weight: bold; font-size: 18px; border: 3px solid #f472b6; cursor: pointer;
-            position: relative; overflow: hidden;
         }
-
-        /* 開卡動畫遮罩 */
-        .reveal-animation-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 10, 0.95); z-index: 999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .pack-tearing { width: 180px; height: 260px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 12px; border: 3px solid #f472b6; }
-        .shake-animation { animation: packShake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes packShake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
         
         .cards-roll-container {
             display: flex; gap: 15px; padding: 20px; overflow-x: auto; width: 100%;
             box-sizing: border-box; justify-content: flex-start;
         }
 
-        /* 核心 3x4 卡牌結構 */
+        /* 核心卡牌結構 (3x4) */
         .card-wrapper { width: var(--card-width); height: var(--card-height); flex-shrink: 0; }
         .card-inner {
             width: 100%; height: 100%; border-radius: 12px; overflow: hidden;
@@ -135,10 +125,19 @@
         .elem-water { background-color: var(--water-color); }
         .elem-grass { background-color: var(--grass-color); }
 
-        .card-art-container { flex: 1; width: 100%; background: #111; position: relative; overflow: hidden; }
-        .card-img { width: 100%; height: 100%; object-fit: cover; }
-        .card-id-badge { font-size: 9px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; position: absolute; bottom: 4px; right: 4px; z-index: 5; border: 1px solid rgba(255,255,255,0.1); }
+        /* 精準局部裁切視窗（完美維持 1/6 單卡顯像） */
+        .card-art-container { 
+            flex: 1; width: 100%; background: #000; 
+            position: relative; overflow: hidden; 
+        }
+        .sprite-clipper {
+            position: absolute;
+            width: 200%;  
+            height: 300%; 
+            object-fit: fill;
+        }
         
+        .card-id-badge { font-size: 9px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; position: absolute; bottom: 4px; right: 4px; z-index: 5; border: 1px solid rgba(255,255,255,0.1); }
         .card-footer { background: rgba(15, 23, 42, 0.95); padding: 5px 8px; font-size: 10px; z-index: 5; }
         .stat-row { display: flex; justify-content: space-between; color: #cbd5e1; }
         .stat-val { font-weight: bold; color: #fff; }
@@ -147,14 +146,14 @@
         .btn-primary { background: linear-gradient(135deg, #fbbf24, #d97706); color: #fff; }
         .btn-secondary { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; }
 
-        /* [分頁二：對戰競技場] */
+        /* 對戰競技場 */
         .battle-arena-wrapper { background: rgba(15,23,42,0.4); border-radius: 16px; padding: 15px; border: 1px dashed rgba(255,255,255,0.1); }
         .arena-slots { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; }
-        .arena-slot { width: var(--card-width); height: var(--card-height); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; background: rgba(0,0,0,0.3); }
+        .arena-slot { width: var(--card-width); height: var(--card-height); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; background: rgba(0,0,0,0.3); overflow: hidden;}
         .vs-text { font-size: 26px; font-weight: 900; color: #ef4444; }
         .battle-log-board { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; text-align: center; color: #fcd34d; font-weight: bold; min-height: 40px; font-size: 13px;}
 
-        /* [分頁三：集卡冊圖鑑 - 60張優化規格] */
+        /* 集卡冊圖鑑滾動面板 */
         .album-scroll-box { flex: 1; overflow-y: auto; max-height: 65vh; padding-right: 5px; }
         .album-scroll-box::-webkit-scrollbar { width: 4px; }
         .album-scroll-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -165,12 +164,12 @@
             border: 1px solid rgba(255,255,255,0.03); filter: grayscale(100%); opacity: 0.25; transition: all 0.2s;
         }
         .album-card-box.unlocked { filter: grayscale(0%); opacity: 1; border-color: #818cf8; background: rgba(30, 41, 59, 0.6); }
-        .album-preview-mini { height: 90px; border-radius: 4px; overflow: hidden; background: #000; }
-        .album-img-thumb { width: 100%; height: 100%; object-fit: cover; }
-        .album-title-text { font-size: 11px; margin-top: 4px; font-weight: bold; }
+        
+        .album-preview-mini { height: 110px; border-radius: 6px; overflow: hidden; background: #000; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+        .album-title-text { font-size: 11px; margin-top: 5px; font-weight: bold; }
         .album-count-badge { font-size: 9px; background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px; display: inline-block; margin-top: 2px;}
 
-        /* [分頁四：玩家資訊與備份] */
+        /* 檔案與備份 */
         .profile-data-card { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; }
         .profile-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
@@ -191,13 +190,12 @@
 
     <div class="app-container">
         
-        <!-- 頂部玩家狀態列 -->
+        <!-- 頂部玩家狀態列（已完美更新玩家名稱） -->
         <div class="top-profile-bar">
             <div class="user-info">
-                <div class="avatar">🃏</div>
+                <div class="avatar">👑</div>
                 <div>
-                    <div style="font-weight: bold; font-size: 14px;">北海厚片</div>
-                    <div style="font-size: 11px; color: #a78bfa;">卡池規格: 60張 / 5大基礎圖</div>
+                    <div style="font-weight: bold; font-size: 15px;">玩家</div>
                 </div>
             </div>
             <div class="energy-badge">🔮 召喚石: <span id="top-tickets">999</span></div>
@@ -206,60 +204,57 @@
         <!-- ==================== [分頁一：開卡主頁] ==================== -->
         <div id="tab-draw" class="game-tab-content active">
             <div class="pack-dispenser-box">
-                <div class="pack-title">60星象核心卡包</div>
-                <div class="pack-graphic" onclick="triggerDrawSequence()">
-                    <div style="font-size: 36px; margin-bottom: 8px;">👑</div>
-                    <div>絕代紅顏衍伸包</div>
-                    <div style="font-size: 10px; color: #f472b6; margin-top: 5px;">5張基礎圖 ╳ 60種不同等級</div>
+                <div class="pack-title">精緻星願卡包 (奇幻冒險)</div>
+                <div class="pack-graphic" onclick="executeDrawGeneration()">
+                    <div style="font-size: 36px; margin-bottom: 8px;">✨</div>
+                    <div>大圖自動去重包</div>
+                    <div style="font-size: 10px; color: #f472b6; margin-top: 5px;">內含 60 階單卡切像</div>
                 </div>
-                <button class="btn btn-primary" onclick="triggerDrawSequence()">開封限定包 (獲得5張)</button>
+                <button class="btn btn-primary" onclick="executeDrawGeneration()">開封限定包 (獲得5張)</button>
             </div>
 
-            <div style="font-weight: bold; font-size: 13px; margin-top: 5px; border-left:3px solid #f472b6; padding-left:6px;">✨ 本次召喚結果 (點擊可直接派遣出戰)</div>
+            <div style="font-weight: bold; font-size: 13px; margin-top: 5px; border-left:3px solid #f472b6; padding-left:6px;">✨ 本次召喚結果 (點擊直接派遣)</div>
             <div class="cards-roll-container" id="recent-draws-container">
-                <div style="color: #64748b; text-align: center; width: 100%; padding: 40px 0;">等待封包開啟...</div>
+                <div style="color: #64748b; text-align: center; width: 100%; padding: 40px 0;">等待召喚...</div>
             </div>
         </div>
 
         <!-- ==================== [分頁二：對戰競技場] ==================== -->
         <div id="tab-battle" class="game-tab-content">
-            <div style="font-weight: bold; font-size: 15px; margin-bottom: 10px;">⚔️ 60星宿天梯對戰</div>
+            <div style="font-weight: bold; font-size: 15px; margin-bottom: 10px;">⚔️ 戰力切片競技場</div>
             <div class="battle-arena-wrapper">
                 <div class="arena-slots">
                     <div class="arena-slot" id="player-battle-slot">請在開卡分頁點選卡片上陣</div>
                     <div class="vs-text">VS</div>
                     <div class="arena-slot" id="enemy-battle-slot">等待對手</div>
                 </div>
-                <div class="battle-log-board" id="battle-log-screen">請派遣英靈，準備進行屬性演算決鬥</div>
+                <div class="battle-log-board" id="battle-log-screen">等待英靈就位...</div>
                 <button class="btn btn-primary" id="fight-go-btn" onclick="runArenaFight()" disabled style="opacity:0.4; margin-top:15px;">啟動決鬥</button>
             </div>
         </div>
 
         <!-- ==================== [分頁三：集卡冊圖鑑] ==================== -->
         <div id="tab-album" class="game-tab-content">
-            <div style="font-weight: bold; font-size: 15px; margin-bottom: 5px;">📜 60款核心制霸集卡冊</div>
+            <div style="font-weight: bold; font-size: 15px; margin-bottom: 5px;">📜 60款單卡制霸集卡冊</div>
             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">當前搜集度：<span id="album-progress-text">0</span> / 60 不同級別卡片</div>
             
             <div class="album-scroll-box">
                 <div class="album-list-grid" id="album-grid-container">
-                    <!-- 由 JavaScript 動態生成 60 個格子 -->
+                    <!-- 由 JavaScript 動態生成 60 個單格切圖 -->
                 </div>
             </div>
         </div>
 
         <!-- ==================== [分頁四：玩家資訊與備份] ==================== -->
         <div id="tab-profile" class="game-tab-content">
-            <div style="font-weight: bold; font-size: 15px; margin-bottom: 15px;">⚙️ 核心數據主控台</div>
-            
+            <div style="font-weight: bold; font-size: 15px; margin-bottom: 15px;">⚙️ 數據主控台</div>
             <div class="profile-data-card">
-                <div class="profile-row"><span>名冊玩家</span><span>北海厚片</span></div>
+                <!-- 數據主控台名稱也同步正名 -->
+                <div class="profile-row"><span>名冊玩家</span><span>玩家</span></div>
                 <div class="profile-row"><span>累計抽取次數</span><span id="stat-total-cards">0</span></div>
                 <div class="profile-row"><span>60卡冊解鎖量</span><span id="stat-total-album">0 / 60</span></div>
             </div>
-
-            <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color:#f472b6;">💾 JSON 進度檔案交互系統</div>
             <button class="btn btn-secondary" onclick="exportGameStateJSON()">📤 匯出目前數據存檔 (JSON)</button>
-            
             <div class="file-input-wrapper">
                 <button class="btn btn-primary">📥 匯入歷史數據存檔 (JSON)</button>
                 <input type="file" id="json-file-loader" accept=".json" onchange="importGameStateJSON(event)">
@@ -284,56 +279,41 @@
 
     </div>
 
-    <!-- 動畫演播遮罩 -->
-    <div class="reveal-animation-overlay" id="animation-stage">
-        <div style="color:#fcd34d; font-size:16px; font-weight:bold; margin-bottom:20px;">正在破碎虛空開封核心包...</div>
-        <div class="pack-tearing shake-animation" id="tearing-pack-model"></div>
-    </div>
-
     <script>
-        // 初始化固定 60 張卡片的核心資料庫定義
         const MASTER_CARD_DATABASE = {};
-        const elementsPool = [
-            { name: '火', class: 'elem-fire' },
-            { name: '水', class: 'elem-water' },
-            { name: '草', class: 'elem-grass' }
-        ];
+        const elementsPool = [{ name: '火', class: 'elem-fire' }, { name: '水', class: 'elem-water' }, { name: '草', class: 'elem-grass' }];
 
-        // 循環生成 60 張不重複卡片，但圖片（imgSrc）嚴格綁定在 card1 ~ card5 之間
         for(let id = 1; id <= 60; id++) {
             let rarity = 'R';
-            if (id <= 10) rarity = 'UPR';       // 1~10號 為極稀有超凡
-            else if (id <= 25) rarity = 'SR';   // 11~25號 為卓越史詩
-                                                // 26~60號 為精銳普通
-            
-            // 關鍵映射邏輯：60張卡片透過模除運算，均勻分流至 1~5 張 3x4 卡面圖片中
-            const imageIndex = ((id - 1) % 5) + 1; 
-            const imgSrc = `card${imageIndex}.png`;
-            
+            if (id <= 10) rarity = 'UPR';
+            else if (id <= 25) rarity = 'SR';
+
+            const fileIndex = ((id - 1) % 5) + 1;
+            const imgSrc = `card${fileIndex}.png`;
+
+            const subIndex = Math.floor((id - 1) / 5) % 6; 
+            const clipX = (subIndex % 2) * 100;      
+            const clipY = Math.floor(subIndex / 2) * 50; 
+
             MASTER_CARD_DATABASE[id] = {
                 id: id,
-                name: `${rarity}級英靈-型態${id}`,
+                name: `${rarity}級英靈-序號${id}`,
                 rarity: rarity,
                 element: elementsPool[id % 3].name,
                 elemClass: elementsPool[id % 3].class,
                 imgSrc: imgSrc,
-                baseAtk: 15 + (id % 15) + (rarity === 'UPR' ? 35 : rarity === 'SR' ? 15 : 0)
+                clipX: clipX,
+                clipY: clipY,
+                baseAtk: 18 + (id % 12) + (rarity === 'UPR' ? 40 : rarity === 'SR' ? 20 : 0)
             };
         }
 
-        // 核心動態數據保存庫（支援 60 張上限的 JSON 匯入與匯出）
-        let gameState = {
-            tickets: 999,
-            totalCardsDrawn: 0,
-            albumCollection: {}
-        };
-        // 初始化歸零 60 張卡的擁有數
+        let gameState = { tickets: 999, totalCardsDrawn: 0, albumCollection: {} };
         for(let id = 1; id <= 60; id++) { gameState.albumCollection[id] = 0; }
 
         let slotPlayerCard = null;
         let slotEnemyCard = null;
 
-        // 初始化建立 60 張圖鑑 DOM 面板
         function buildAlbumDOMTemplate() {
             const grid = document.getElementById('album-grid-container');
             grid.innerHTML = '';
@@ -344,7 +324,7 @@
                 item.id = `album-box-${id}`;
                 item.innerHTML = `
                     <div class="album-preview-mini">
-                        <img src="${meta.imgSrc}" class="album-img-thumb" alt="圖鑑">
+                        <img src="${meta.imgSrc}" class="sprite-clipper" style="left: -${meta.clipX}%; top: -${meta.clipY}%;">
                     </div>
                     <div class="album-title-text" style="color:${meta.rarity==='UPR'?'#ff007f':meta.rarity==='SR'?'#ff7b00':'#3b82f6'}">#${id} ${meta.rarity}</div>
                     <div class="album-count-badge" id="album-count-${id}">未擁有</div>
@@ -360,31 +340,19 @@
             element.classList.add('active');
         }
 
-        function triggerDrawSequence() {
-            if(gameState.tickets < 1) return alert("召喚能量耗盡！");
-            const stage = document.getElementById('animation-stage');
-            stage.style.display = 'flex';
-            setTimeout(() => {
-                stage.style.display = 'none';
-                executeDrawGeneration();
-            }, 600);
-        }
-
-        // 隨機從 60 張的卡池中抽出 5 張
         function executeDrawGeneration() {
+            if(gameState.tickets < 1) return alert("召喚石不足");
             gameState.tickets -= 1;
             const container = document.getElementById('recent-draws-container');
             container.innerHTML = '';
 
             for(let i = 0; i < 5; i++) {
-                // 從 1 ~ 60 張卡池中隨機選中一張
                 const randomId = Math.floor(Math.random() * 60) + 1;
                 const meta = MASTER_CARD_DATABASE[randomId];
 
-                // 動態附加等級與速度演算
-                const dynamicLevel = Math.floor(Math.random() * 40) + 10;
-                const finalAtk = meta.baseAtk + Math.floor(dynamicLevel / 2);
-                const spd = (Math.random() * 3 + 2).toFixed(1);
+                const dynamicLevel = Math.floor(Math.random() * 30) + 15;
+                const finalAtk = meta.baseAtk + Math.floor(dynamicLevel * 0.7);
+                const spd = (Math.random() * 4 + 2).toFixed(1);
 
                 gameState.totalCardsDrawn++;
                 gameState.albumCollection[randomId]++; 
@@ -392,7 +360,7 @@
                 const cardPayload = {
                     id: randomId, rarity: meta.rarity, level: dynamicLevel,
                     atk: finalAtk, spd: spd, element: meta.element,
-                    elemClass: meta.elemClass, imgSrc: meta.imgSrc, name: meta.name
+                    elemClass: meta.elemClass, imgSrc: meta.imgSrc, clipX: meta.clipX, clipY: meta.clipY
                 };
 
                 const wrap = document.createElement('div');
@@ -406,7 +374,7 @@
                             <span style="color:#ffcc00;">Lv.${dynamicLevel}</span>
                         </div>
                         <div class="card-art-container">
-                            <img src="${meta.imgSrc}" class="card-img" alt="卡面">
+                            <img src="${meta.imgSrc}" class="sprite-clipper" style="left: -${meta.clipX}%; top: -${meta.clipY}%;">
                             <div class="card-id-badge">No.${randomId}</div>
                         </div>
                         <div class="card-footer">
@@ -424,19 +392,18 @@
             slotPlayerCard = cardData;
             document.getElementById('player-battle-slot').innerHTML = buildSlotCardHTML(cardData);
             
-            // 敵方也隨機抽一張對戰
             const enemyId = Math.floor(Math.random() * 60) + 1;
             const emeta = MASTER_CARD_DATABASE[enemyId];
             slotEnemyCard = {
-                rarity: emeta.rarity, level: 25, atk: emeta.baseAtk + 10,
-                spd: 3.2, element: emeta.element, elemClass: emeta.elemClass,
-                imgSrc: emeta.imgSrc, id: enemyId
+                rarity: emeta.rarity, level: 30, atk: emeta.baseAtk + 15,
+                element: emeta.element, elemClass: emeta.elemClass,
+                imgSrc: emeta.imgSrc, clipX: emeta.clipX, clipY: emeta.clipY, id: enemyId
             };
             document.getElementById('enemy-battle-slot').innerHTML = buildSlotCardHTML(slotEnemyCard);
             
             const btn = document.getElementById('fight-go-btn');
             btn.disabled = false; btn.style.opacity = "1";
-            document.getElementById('battle-log-screen').innerText = "已將 No." + cardData.id + " 送入前線！";
+            document.getElementById('battle-log-screen').innerText = "英靈 No." + cardData.id + " 已就緒，可以開戰！";
             switchMainTab('battle', document.querySelectorAll('.nav-tab-item')[1]);
         }
 
@@ -448,7 +415,7 @@
                         <span class="element-tag ${d.elemClass}">${d.element}</span>
                     </div>
                     <div class="card-art-container">
-                        <img src="${d.imgSrc}" class="card-img">
+                        <img src="${d.imgSrc}" class="sprite-clipper" style="left: -${d.clipX}%; top: -${d.clipY}%;">
                         <div class="card-id-badge">No.${d.id}</div>
                     </div>
                     <div class="card-footer">
@@ -462,13 +429,11 @@
             if(!slotPlayerCard || !slotEnemyCard) return;
             let pAtk = parseInt(slotPlayerCard.atk);
             let eAtk = parseInt(slotEnemyCard.atk);
+            if ((slotPlayerCard.element==='水' && slotEnemyCard.element==='火') || (slotPlayerCard.element==='火' && slotEnemyCard.element==='草') || (slotPlayerCard.element==='草' && slotEnemyCard.element==='水')) { pAtk += 20; }
             
-            if ((slotPlayerCard.element==='水' && slotEnemyCard.element==='火') || (slotPlayerCard.element==='火' && slotEnemyCard.element==='草') || (slotPlayerCard.element==='草' && slotEnemyCard.element==='水')) {
-                pAtk += 15;
-            }
             const screen = document.getElementById('battle-log-screen');
-            if(pAtk >= eAtk) screen.innerHTML = `<span style="color:#10b981;">👑 壓制勝利！</span><br>我方以最終強度 ${pAtk} 擊潰敵方 No.${slotEnemyCard.id}`;
-            else screen.innerHTML = `<span style="color:#ef4444;">❌ 戰敗...</span><br>對手強度 ${eAtk}，我方火力不足。`;
+            if(pAtk >= eAtk) screen.innerHTML = `<span style="color:#10b981;">👑 決鬥大勝！</span><br>我方成功克制對手 No.${slotEnemyCard.id}`;
+            else screen.innerHTML = `<span style="color:#ef4444;">❌ 慘遭落敗...</span><br>對手火力壓制。`;
             document.getElementById('fight-go-btn').disabled = true;
             document.getElementById('fight-go-btn').style.opacity = "0.4";
         }
@@ -498,12 +463,11 @@
             document.getElementById('stat-total-album').innerText = `${uniqueUnlockedCount} / 60`;
         }
 
-        // ==================== JSON 存檔交互 (對接 60 規格) ====================
         function exportGameStateJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 4));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `card_game_60池_save.json`);
+            dlAnchor.setAttribute("download", `card_game_save.json`);
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
@@ -517,17 +481,10 @@
                 try {
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.hasOwnProperty('albumCollection')) {
-                        // 自動補齊結構至 60 軌
-                        for(let id = 1; id <= 60; id++) {
-                            if(!parsed.albumCollection.hasOwnProperty(id)) parsed.albumCollection[id] = 0;
-                        }
-                        gameState = parsed;
-                        refreshUI();
-                        alert("🎉 60席核心圖鑑進度已讀取成功！");
-                    } else {
-                        alert("❌ 檔案結構與 60 卡池不符");
+                        gameState = parsed; refreshUI();
+                        alert("🎉 存檔資料加載完成！");
                     }
-                } catch(err) { alert("❌ 無法解析 JSON 存檔"); }
+                } catch(err) { alert("讀取失敗"); }
             };
             reader.readAsText(file);
         }
