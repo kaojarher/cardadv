@@ -149,10 +149,45 @@
 
         /* 對戰競技場 */
         .battle-arena-wrapper { background: rgba(15,23,42,0.4); border-radius: 16px; padding: 15px; border: 1px dashed rgba(255,255,255,0.1); }
-        .arena-slots { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; }
-        .arena-slot { width: var(--card-width); height: var(--card-height); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; background: rgba(0,0,0,0.3); overflow: hidden;}
+        .arena-slots { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; position: relative; }
+        .arena-slot { width: var(--card-width); height: var(--card-height); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; background: rgba(0,0,0,0.3); overflow: visible; cursor: default; }
+        .arena-slot .card-inner { cursor: pointer; }
         .vs-text { font-size: 26px; font-weight: 900; color: #ef4444; }
         .battle-log-board { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; text-align: center; color: #fcd34d; font-weight: bold; min-height: 40px; font-size: 13px;}
+
+        /* HP 條 */
+        .hp-bar-track { height: 6px; width: 100%; background: rgba(255,255,255,0.15); }
+        .hp-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg,#22c55e,#4ade80); transition: width 0.45s ease, background 0.3s ease; }
+        .hp-bar-fill.low { background: linear-gradient(90deg,#ef4444,#f87171); }
+
+        /* 飄浮傷害數字錨點 */
+        .dmg-anchor { position: absolute; top: 0; width: var(--card-width); height: var(--card-height); pointer-events: none; z-index: 30; }
+        #player-dmg-anchor { left: 0; }
+        #enemy-dmg-anchor { right: 0; }
+
+        @keyframes floatUpFade { 0% { transform: translate(-50%,0); opacity: 1; } 100% { transform: translate(-50%,-40px); opacity: 0; } }
+        .dmg-float-text { position: absolute; left: 50%; top: 42%; font-size: 20px; font-weight: 900; color: #ef4444; text-shadow: 0 0 6px rgba(0,0,0,0.9); animation: floatUpFade 0.9s ease-out forwards; pointer-events: none; white-space: nowrap; }
+        .element-burst-text { position: absolute; left: 50%; top: 18%; font-size: 10px; font-weight: 900; color: #fcd34d; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 6px; animation: floatUpFade 0.9s ease-out forwards; pointer-events: none; white-space: nowrap; }
+
+        /* 攻擊/受擊/勝敗動畫 (置於 .card-inner 規則之後以覆蓋預設 animation) */
+        @keyframes lungeRight { 0% { transform: translateX(0) scale(1); } 40% { transform: translateX(45px) scale(1.06) rotate(-2deg); } 100% { transform: translateX(0) scale(1); } }
+        @keyframes lungeLeft { 0% { transform: translateX(0) scale(1); } 40% { transform: translateX(-45px) scale(1.06) rotate(2deg); } 100% { transform: translateX(0) scale(1); } }
+        @keyframes shakeHit {
+            0% { transform: translateX(0); box-shadow: 0 0 0 rgba(239,68,68,0); }
+            15% { transform: translateX(-10px) rotate(-3deg); box-shadow: 0 0 25px rgba(239,68,68,0.9); }
+            30% { transform: translateX(10px) rotate(3deg); }
+            45% { transform: translateX(-8px) rotate(-2deg); }
+            60% { transform: translateX(8px) rotate(2deg); }
+            80% { transform: translateX(-4px); }
+            100% { transform: translateX(0); box-shadow: 0 0 0 rgba(239,68,68,0); }
+        }
+        @keyframes victorPulse { 0%, 100% { box-shadow: 0 0 20px 4px rgba(250,204,21,0.6); } 50% { box-shadow: 0 0 35px 10px rgba(250,204,21,0.95); } }
+
+        .lunge-right { animation: lungeRight 0.5s ease; position: relative; z-index: 20; }
+        .lunge-left { animation: lungeLeft 0.5s ease; position: relative; z-index: 20; }
+        .shake-hit { animation: shakeHit 0.45s ease; position: relative; z-index: 20; }
+        .victor-glow { animation: victorPulse 1.1s ease-in-out infinite; border-color: #facc15 !important; }
+        .defeat-fade { filter: grayscale(80%) brightness(0.6); transform: rotate(-4deg) translateY(6px); opacity: 0.75; transition: all 0.6s ease; }
 
         /* 集卡冊圖鑑滾動面板 */
         .album-scroll-box { flex: 1; overflow-y: auto; max-height: 65vh; padding-right: 5px; }
@@ -201,6 +236,30 @@
         .nav-tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; color: #94a3b8; font-size: 11px; cursor: pointer; gap: 4px; }
         .nav-tab-item.active { color: #a78bfa; font-weight: bold; background: rgba(255,255,255,0.02); }
         .nav-icon { font-size: 18px; }
+
+        /* 卡片放大 + 3D 翻卡彈窗 */
+        .zoom-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 20px; box-sizing: border-box;
+        }
+        .zoom-overlay.open { opacity: 1; pointer-events: auto; }
+        .zoom-content { display: flex; flex-direction: column; align-items: center; max-width: 320px; width: 100%; }
+
+        .flip-card-3d { width: 240px; height: 320px; perspective: 1400px; cursor: pointer; }
+        .flip-inner-3d { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1); transform-style: preserve-3d; }
+        .flip-inner-3d.flipped { transform: rotateY(180deg); }
+        .flip-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 14px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+        .flip-front .card-inner { animation: none !important; }
+        .flip-back {
+            transform: rotateY(180deg); background: linear-gradient(135deg, #312e81, #1e1b4b);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            border: 3px solid #6366f1; color: #a5b4fc; font-weight: 900; font-size: 16px; text-align: center; gap: 10px;
+        }
+        .zoom-caption { margin-top: 14px; font-size: 13px; color: #e2e8f0; text-align: center; font-weight: bold; }
+        .zoom-hint { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+        .zoom-actions { display: flex; gap: 10px; width: 100%; margin-top: 14px; }
+        .zoom-actions .btn { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -241,9 +300,11 @@
             <div style="font-weight: bold; font-size: 15px; margin-bottom: 10px;">⚔️ 戰力切片競技場</div>
             <div class="battle-arena-wrapper">
                 <div class="arena-slots">
+                    <div class="dmg-anchor" id="player-dmg-anchor"></div>
                     <div class="arena-slot" id="player-battle-slot">請在開卡分頁點選卡片上陣</div>
                     <div class="vs-text">VS</div>
                     <div class="arena-slot" id="enemy-battle-slot">等待對手</div>
+                    <div class="dmg-anchor" id="enemy-dmg-anchor"></div>
                 </div>
                 <div class="battle-log-board" id="battle-log-screen">等待英靈就位...</div>
                 <button class="btn btn-primary" id="fight-go-btn" onclick="runArenaFight()" disabled style="opacity:0.4; margin-top:15px;">啟動決鬥</button>
@@ -295,6 +356,28 @@
 
     </div>
 
+    <!-- ==================== [卡片放大 + 3D 翻卡彈窗] ==================== -->
+    <div class="zoom-overlay" id="card-zoom-overlay" onclick="closeCardZoom(event)">
+        <div class="zoom-content" onclick="event.stopPropagation()">
+            <div class="flip-card-3d" id="zoom-flip-card" onclick="toggleZoomFlip()">
+                <div class="flip-inner-3d" id="zoom-flip-inner">
+                    <div class="flip-face flip-front" id="zoom-front-face"></div>
+                    <div class="flip-face flip-back">
+                        <div style="font-size:34px;">🔮</div>
+                        <div>奇幻冒險</div>
+                        <div style="font-size:11px; color:#818cf8; font-weight:normal;">60席核心英靈錄</div>
+                    </div>
+                </div>
+            </div>
+            <div class="zoom-caption" id="zoom-caption"></div>
+            <div class="zoom-hint">👆 點擊卡片可翻面看背面</div>
+            <div class="zoom-actions">
+                <button class="btn btn-primary" id="zoom-deploy-btn" style="display:none;" onclick="event.stopPropagation()">派遣上陣</button>
+                <button class="btn btn-secondary" onclick="closeCardZoom()">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const MASTER_CARD_DATABASE = {};
         const elementsPool = [{ name: '火', class: 'elem-fire' }, { name: '水', class: 'elem-water' }, { name: '草', class: 'elem-grass' }];
@@ -339,6 +422,11 @@
                 const item = document.createElement('div');
                 item.className = 'album-card-box';
                 item.id = `album-box-${id}`;
+                item.style.cursor = 'pointer';
+                item.onclick = () => openCardZoom({
+                    id: id, rarity: meta.rarity, element: meta.element, elemClass: meta.elemClass,
+                    imgSrc: meta.imgSrc, clipX: meta.clipX, clipY: meta.clipY, atk: meta.baseAtk
+                }, { deployable: false, ownedQty: gameState.albumCollection[id] || 0 });
                 item.innerHTML = `
                     <div class="album-preview-mini">
                         <img src="${meta.imgSrc}" class="sprite-clipper" style="left: -${meta.clipX}%; top: -${meta.clipY}%;">
@@ -382,7 +470,7 @@
 
                 const wrap = document.createElement('div');
                 wrap.className = `card-wrapper ${meta.rarity}`;
-                wrap.onclick = () => sendToBattleField(cardPayload);
+                wrap.onclick = () => openCardZoom(cardPayload, { deployable: true });
                 wrap.innerHTML = `
                     <div class="card-inner">
                         <div class="card-header">
@@ -407,16 +495,23 @@
 
         function sendToBattleField(cardData) {
             slotPlayerCard = cardData;
-            document.getElementById('player-battle-slot').innerHTML = buildSlotCardHTML(cardData);
+            document.getElementById('player-battle-slot').innerHTML = buildSlotCardHTML(cardData, 'player');
+            document.getElementById('player-battle-slot').onclick = () => openCardZoom(slotPlayerCard, { deployable: false });
             
             const enemyId = Math.floor(Math.random() * 60) + 1;
             const emeta = MASTER_CARD_DATABASE[enemyId];
             slotEnemyCard = {
                 rarity: emeta.rarity, level: 30, atk: emeta.baseAtk + 15,
+                spd: (Math.random() * 4 + 2).toFixed(1),
                 element: emeta.element, elemClass: emeta.elemClass,
                 imgSrc: emeta.imgSrc, clipX: emeta.clipX, clipY: emeta.clipY, id: enemyId
             };
-            document.getElementById('enemy-battle-slot').innerHTML = buildSlotCardHTML(slotEnemyCard);
+            document.getElementById('enemy-battle-slot').innerHTML = buildSlotCardHTML(slotEnemyCard, 'enemy');
+            document.getElementById('enemy-battle-slot').onclick = () => openCardZoom(slotEnemyCard, { deployable: false });
+
+            clearBattleVisualState();
+            updateHpBar('player', 100);
+            updateHpBar('enemy', 100);
             
             const btn = document.getElementById('fight-go-btn');
             btn.disabled = false; btn.style.opacity = "1";
@@ -424,13 +519,14 @@
             switchMainTab('battle', document.querySelectorAll('.nav-tab-item')[1]);
         }
 
-        function buildSlotCardHTML(d) {
+        function buildSlotCardHTML(d, side) {
             return `
                 <div class="card-inner" style="width:100%; height:100%;">
                     <div class="card-header">
                         <span class="rarity-tag">${d.rarity}</span>
                         <span class="element-tag ${d.elemClass}">${d.element}</span>
                     </div>
+                    <div class="hp-bar-track"><div class="hp-bar-fill" id="${side}-hp-fill" style="width:100%"></div></div>
                     <div class="card-art-container">
                         <img src="${d.imgSrc}" class="sprite-clipper" style="left: -${d.clipX}%; top: -${d.clipY}%;">
                         <div class="card-id-badge">No.${d.id}</div>
@@ -442,17 +538,185 @@
             `;
         }
 
-        function runArenaFight() {
-            if(!slotPlayerCard || !slotEnemyCard) return;
-            let pAtk = parseInt(slotPlayerCard.atk);
-            let eAtk = parseInt(slotEnemyCard.atk);
-            if ((slotPlayerCard.element==='水' && slotEnemyCard.element==='火') || (slotPlayerCard.element==='火' && slotEnemyCard.element==='草') || (slotPlayerCard.element==='草' && slotEnemyCard.element==='水')) { pAtk += 20; }
-            
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function hasElementAdvantage(a, b) {
+            return (a === '水' && b === '火') || (a === '火' && b === '草') || (a === '草' && b === '水');
+        }
+
+        function updateHpBar(side, val) {
+            const fill = document.getElementById(`${side}-hp-fill`);
+            if (!fill) return;
+            fill.style.width = Math.max(0, val) + '%';
+            fill.classList.toggle('low', val <= 30);
+        }
+
+        function clearBattleVisualState() {
+            document.querySelectorAll('.arena-slot .card-inner').forEach(el => {
+                el.classList.remove('victor-glow', 'defeat-fade', 'lunge-right', 'lunge-left', 'shake-hit');
+                el.style.transform = '';
+            });
+            document.getElementById('player-dmg-anchor').innerHTML = '';
+            document.getElementById('enemy-dmg-anchor').innerHTML = '';
+        }
+
+        function spawnDamageFloat(side, dmg) {
+            const anchor = document.getElementById(`${side}-dmg-anchor`);
+            if (!anchor) return;
+            const el = document.createElement('div');
+            el.className = 'dmg-float-text';
+            el.innerText = `-${dmg}`;
+            anchor.appendChild(el);
+            setTimeout(() => el.remove(), 900);
+        }
+
+        function showElementBurst(side) {
+            const anchor = document.getElementById(`${side}-dmg-anchor`);
+            if (!anchor) return;
+            const el = document.createElement('div');
+            el.className = 'element-burst-text';
+            el.innerText = '屬性剋制！';
+            anchor.appendChild(el);
+            setTimeout(() => el.remove(), 900);
+        }
+
+        function playAttackAnimation(attackerSide, defenderSide, dmg) {
+            return new Promise(resolve => {
+                const attackerInner = document.querySelector(`#${attackerSide}-battle-slot .card-inner`);
+                const defenderInner = document.querySelector(`#${defenderSide}-battle-slot .card-inner`);
+                const lungeClass = attackerSide === 'player' ? 'lunge-right' : 'lunge-left';
+                if (attackerInner) attackerInner.classList.add(lungeClass);
+                setTimeout(() => {
+                    if (defenderInner) defenderInner.classList.add('shake-hit');
+                    spawnDamageFloat(defenderSide, dmg);
+                }, 220);
+                setTimeout(() => {
+                    if (attackerInner) attackerInner.classList.remove(lungeClass);
+                    if (defenderInner) defenderInner.classList.remove('shake-hit');
+                    resolve();
+                }, 600);
+            });
+        }
+
+        function playVictorySequence(winnerSide, loserSide) {
+            const winnerInner = document.querySelector(`#${winnerSide}-battle-slot .card-inner`);
+            const loserInner = document.querySelector(`#${loserSide}-battle-slot .card-inner`);
+            if (winnerInner) winnerInner.classList.add('victor-glow');
+            if (loserInner) loserInner.classList.add('defeat-fade');
+        }
+
+        async function runArenaFight() {
+            if (!slotPlayerCard || !slotEnemyCard) return;
+            const fightBtn = document.getElementById('fight-go-btn');
+            fightBtn.disabled = true; fightBtn.style.opacity = "0.4";
             const screen = document.getElementById('battle-log-screen');
-            if(pAtk >= eAtk) screen.innerHTML = `<span style="color:#10b981;">👑 決鬥大勝！</span><br>我方成功克制對手 No.${slotEnemyCard.id}`;
-            else screen.innerHTML = `<span style="color:#ef4444;">❌ 慘遭落敗...</span><br>對手火力壓制。`;
-            document.getElementById('fight-go-btn').disabled = true;
-            document.getElementById('fight-go-btn').style.opacity = "0.4";
+
+            clearBattleVisualState();
+            let pHp = 100, eHp = 100;
+            updateHpBar('player', pHp);
+            updateHpBar('enemy', eHp);
+
+            const pAtk = parseInt(slotPlayerCard.atk);
+            const eAtk = parseInt(slotEnemyCard.atk);
+            const pAdvantage = hasElementAdvantage(slotPlayerCard.element, slotEnemyCard.element);
+            const eAdvantage = hasElementAdvantage(slotEnemyCard.element, slotPlayerCard.element);
+            const pSpd = parseFloat(slotPlayerCard.spd) || (Math.random() * 4 + 2);
+            const eSpd = parseFloat(slotEnemyCard.spd) || (Math.random() * 4 + 2);
+
+            screen.innerText = "⚔️ 戰鬥開始！";
+            await sleep(500);
+
+            let round = 1;
+            while (pHp > 0 && eHp > 0 && round <= 6) {
+                screen.innerText = `第 ${round} 回合交鋒中...`;
+                const order = pSpd >= eSpd ? ['player', 'enemy'] : ['enemy', 'player'];
+                for (const attacker of order) {
+                    if (pHp <= 0 || eHp <= 0) break;
+                    if (attacker === 'player') {
+                        let dmg = Math.max(5, pAtk - Math.floor(eAtk * 0.3) + Math.floor(Math.random() * 8));
+                        if (pAdvantage) { dmg += 15; showElementBurst('player'); }
+                        eHp = Math.max(0, eHp - dmg);
+                        await playAttackAnimation('player', 'enemy', dmg);
+                        updateHpBar('enemy', eHp);
+                    } else {
+                        let dmg = Math.max(5, eAtk - Math.floor(pAtk * 0.3) + Math.floor(Math.random() * 8));
+                        if (eAdvantage) { dmg += 15; showElementBurst('enemy'); }
+                        pHp = Math.max(0, pHp - dmg);
+                        await playAttackAnimation('enemy', 'player', dmg);
+                        updateHpBar('player', pHp);
+                    }
+                    await sleep(250);
+                }
+                round++;
+            }
+
+            await sleep(200);
+            if (pHp <= 0 && eHp <= 0) {
+                screen.innerHTML = `<span style="color:#fbbf24;">⚡ 兩敗俱傷！</span>`;
+            } else if (eHp <= 0 || (pHp > eHp)) {
+                screen.innerHTML = `<span style="color:#10b981;">👑 決鬥大勝！</span><br>我方成功擊敗對手 No.${slotEnemyCard.id}`;
+                playVictorySequence('player', 'enemy');
+            } else {
+                screen.innerHTML = `<span style="color:#ef4444;">❌ 慘遭落敗...</span><br>對手 No.${slotEnemyCard.id} 火力壓制`;
+                playVictorySequence('enemy', 'player');
+            }
+        }
+
+        function buildZoomFrontHTML(d) {
+            const levelLine = d.level ? `<span style="color:#ffcc00;">Lv.${d.level}</span>` : '';
+            const spdLine = d.spd ? `<div class="stat-row"><span>⚡ SPD</span><span class="stat-val">${d.spd}</span></div>` : '';
+            return `
+                <div class="card-inner" style="width:100%; height:100%;">
+                    <div class="card-header">
+                        <span class="rarity-tag">${d.rarity}</span>
+                        <span class="element-tag ${d.elemClass}">${d.element}</span>
+                        ${levelLine}
+                    </div>
+                    <div class="card-art-container">
+                        <img src="${d.imgSrc}" class="sprite-clipper" style="left: -${d.clipX}%; top: -${d.clipY}%;">
+                        <div class="card-id-badge">No.${d.id}</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="stat-row"><span>⚔️ ATK</span><span class="stat-val">${d.atk}</span></div>
+                        ${spdLine}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openCardZoom(d, options = {}) {
+            const overlay = document.getElementById('card-zoom-overlay');
+            const frontFace = document.getElementById('zoom-front-face');
+            const inner = document.getElementById('zoom-flip-inner');
+            const caption = document.getElementById('zoom-caption');
+            const deployBtn = document.getElementById('zoom-deploy-btn');
+
+            inner.classList.remove('flipped');
+            frontFace.innerHTML = buildZoomFrontHTML(d);
+
+            let capText = `${d.rarity} 級英靈 ・ No.${d.id}`;
+            if (options.ownedQty !== undefined) {
+                capText += options.ownedQty > 0 ? ` ・ 擁有 ${options.ownedQty} 張` : ` ・ 尚未擁有`;
+            }
+            caption.innerText = capText;
+
+            if (options.deployable) {
+                deployBtn.style.display = 'block';
+                deployBtn.onclick = (e) => { e.stopPropagation(); closeCardZoom(); sendToBattleField(d); };
+            } else {
+                deployBtn.style.display = 'none';
+            }
+
+            overlay.classList.add('open');
+        }
+
+        function closeCardZoom(event) {
+            if (event && event.target.id !== 'card-zoom-overlay') return;
+            document.getElementById('card-zoom-overlay').classList.remove('open');
+        }
+
+        function toggleZoomFlip() {
+            document.getElementById('zoom-flip-inner').classList.toggle('flipped');
         }
 
         function refreshUI() {
