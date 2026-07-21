@@ -400,12 +400,13 @@
         const MASTER_CARD_DATABASE = {};
         const elementsPool = [{ name: '火', class: 'elem-fire' }, { name: '水', class: 'elem-water' }, { name: '草', class: 'elem-grass' }];
 
-        // 三個稀有度各自擁有獨立的 60 席卡槽（共 180 張），各階圖檔請自行命名為
-        // upr1.png~upr5.png / sr1.png~sr5.png / r1.png~r5.png，每張圖仍為 3欄x4列=12張卡
+        // 三個稀有度各自擁有獨立的 60 席卡槽（共 180 張）。目前三階共用同一組 card1.png~card5.png
+        // 圖檔（每張 3欄x4列=12張切圖，5張恰好對應60席），所以 UPR/SR/R 會出現相同插畫、
+        // 只靠外框與特效區分。之後若有各階專屬美術，只要改回各自前綴（如 upr1.png…）即可分流。
         const RARITY_TIERS = [
-            { key: 'UPR', prefix: 'upr', slotCount: 60, atkBonus: 40 },
-            { key: 'SR',  prefix: 'sr',  slotCount: 60, atkBonus: 20 },
-            { key: 'R',   prefix: 'r',   slotCount: 60, atkBonus: 0  }
+            { key: 'UPR', prefix: 'card', slotCount: 60, atkBonus: 40 },
+            { key: 'SR',  prefix: 'card', slotCount: 60, atkBonus: 20 },
+            { key: 'R',   prefix: 'card', slotCount: 60, atkBonus: 0  }
         ];
 
         let globalId = 1;
